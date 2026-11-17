@@ -56,7 +56,7 @@ end
 local function cleanPath(path)
     assert(typeof(path) == "string" and path ~= "", "A repository path is required")
     path = path:gsub("\\", "/"):gsub("^/+", "")
-    assert(not path:find("%.%.", 1, true), "Parent-directory paths are not allowed")
+    assert(not path:find("..", 1, true), "Parent-directory paths are not allowed")
     assert(not path:find("[%c]"), "Control characters are not allowed in paths")
     return path
 end
