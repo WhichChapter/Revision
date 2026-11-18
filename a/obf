@@ -1,0 +1,154 @@
+-- CAT.JAILBREAK : Solara Native Obfuscator & Wrapper GUI (Fixed)
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+-- Prevent duplicate UI instances
+if CoreGui:FindFirstChild("CatJailbreakObfuscator") then
+    CoreGui.CatJailbreakObfuscator:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CatJailbreakObfuscator"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BorderColor3 = Color3.fromRGB(180, 0, 0)
+MainFrame.BorderSizePixel = 2
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- Title Bar
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Parent = MainFrame
+TitleBar.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+TitleBar.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.Font = Enum.Font.Code
+TitleBar.Text = "  CAT.JAILBREAK // SOLARA OBFUSCATOR v1.1"
+TitleBar.TextColor3 = Color3.fromRGB(255, 60, 60)
+TitleBar.TextSize = 14
+TitleBar.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = TitleBar
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
+CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Font = Enum.Font.Code
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 14
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Input Box (Source)
+local InputBox = Instance.new("TextBox")
+InputBox.Parent = MainFrame
+InputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+InputBox.BorderColor3 = Color3.fromRGB(80, 0, 0)
+InputBox.Position = UDim2.new(0.03, 0, 0.15, 0)
+InputBox.Size = UDim2.new(0.44, 0, 0.65, 0)
+InputBox.ClearTextOnFocus = false
+InputBox.Font = Enum.Font.Code
+InputBox.MultiLine = true
+InputBox.PlaceholderText = "-- Paste raw Lua source here..."
+InputBox.Text = ""
+InputBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+InputBox.TextSize = 12
+InputBox.TextXAlignment = Enum.TextXAlignment.Left
+InputBox.TextYAlignment = Enum.TextYAlignment.Top
+
+-- Output Box (Obfuscated)
+local OutputBox = Instance.new("TextBox")
+OutputBox.Parent = MainFrame
+OutputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+OutputBox.BorderColor3 = Color3.fromRGB(80, 0, 0)
+OutputBox.Position = UDim2.new(0.53, 0, 0.15, 0)
+OutputBox.Size = UDim2.new(0.44, 0, 0.65, 0)
+OutputBox.ClearTextOnFocus = false
+OutputBox.Font = Enum.Font.Code
+OutputBox.MultiLine = true
+OutputBox.PlaceholderText = "-- Obfuscated output will appear here..."
+OutputBox.Text = ""
+OutputBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+OutputBox.TextSize = 12
+OutputBox.TextXAlignment = Enum.TextXAlignment.Left
+OutputBox.TextYAlignment = Enum.TextYAlignment.Top
+OutputBox.TextEditable = false
+
+-- Obfuscate Button
+local ObfuscateBtn = Instance.new("TextButton")
+ObfuscateBtn.Parent = MainFrame
+ObfuscateBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+ObfuscateBtn.BorderColor3 = Color3.fromRGB(200, 0, 0)
+ObfuscateBtn.Position = UDim2.new(0.03, 0, 0.84, 0)
+ObfuscateBtn.Size = UDim2.new(0.44, 0, 0.12, 0)
+ObfuscateBtn.Font = Enum.Font.Code
+ObfuscateBtn.Text = "OBFUSCATE SCRIPT"
+ObfuscateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ObfuscateBtn.TextSize = 13
+
+-- Copy Button
+local CopyBtn = Instance.new("TextButton")
+CopyBtn.Parent = MainFrame
+CopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+CopyBtn.BorderColor3 = Color3.fromRGB(80, 0, 0)
+CopyBtn.Position = UDim2.new(0.53, 0, 0.84, 0)
+CopyBtn.Size = UDim2.new(0.44, 0, 0.12, 0)
+CopyBtn.Font = Enum.Font.Code
+CopyBtn.Text = "COPY OUTPUT"
+CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyBtn.TextSize = 13
+
+-- Obfuscation Logic (Byte-level string encoding wrapper)
+ObfuscateBtn.MouseButton1Click:Connect(function()
+    local source = InputBox.Text
+    if source == "" then
+        OutputBox.Text = "-- Error: Input source is empty."
+        return
+    end
+
+    local bytes = {}
+    for i = 1, #source do
+        table.insert(bytes, string.byte(source, i))
+    end
+
+    local encodedBytes = table.concat(bytes, ",")
+    
+    local wrapped = string.format([[
+-- [CAT.JAILBREAK] Obfuscated via Solara Native Suite
+local _b = {%s}
+local _s = {}
+for _, _v in ipairs(_b) do
+    table.insert(_s, string.char(_v))
+end
+local _code = table.concat(_s)
+return loadstring(_code)()
+]], encodedBytes)
+
+    OutputBox.Text = wrapped
+end)
+
+-- Copy Logic
+CopyBtn.MouseButton1Click:Connect(function()
+    if OutputBox.Text ~= "" and setclipboard then
+        setclipboard(OutputBox.Text)
+        CopyBtn.Text = "[+] COPIED TO CLIPBOARD"
+        task.wait(1.5)
+        CopyBtn.Text = "COPY OUTPUT"
+    end
+end)
+
+print("[+] CAT.JAILBREAK Solara Obfuscator GUI v1.1 loaded successfully.")
